@@ -16,7 +16,7 @@ st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wi
 #st.title(" :bar_chart: ElectroDunas")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
 
-os.chdir('C:/Nelson/ANDES/Bimestre 8/Proyecto aplicado en analítica de datos/Semana 8/Prueba/CargaTG')
+#os.chdir('C:/Nelson/ANDES/Bimestre 8/Proyecto aplicado en analítica de datos/Semana 8/Prueba/CargaTG')
 con = sqlite3.connect('Clientes.db')
 
 #print(df)
