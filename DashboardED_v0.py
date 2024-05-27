@@ -57,7 +57,7 @@ with col2:
 st.sidebar.header("Escoge tu filtro: ")
 
 # Choose for Sector
-query = 'SELECT DISTINCT SectorD, ClientesD FROM Clientes WHERE Time >= "20:00:00" AND FechaC >= ? AND FechaC <= ? ORDER BY ClientesD, SectorD;'
+query = 'SELECT DISTINCT SectorD, ClientesD FROM V_ClientesF WHERE FechaC >= ? AND FechaC <= ? ORDER BY ClientesD, SectorD;'
 params = [s, e]
 SectorCliente = pd.read_sql_query (query, con, params=params)
 #sector = st.sidebar.multiselect("Escoge el Sector", sector)
@@ -77,14 +77,14 @@ else:
 
 # Filter the data based on sector and cliente
 if not sector and not cliente:
-    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE Time >= "20:00:00" AND FechaC >= ? AND FechaC <= ?;'
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM V_ClientesF WHERE FechaC >= ? AND FechaC <= ?;'
     params = [s, e]
     df = pd.read_sql_query (query, con, params=params)
     #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
     #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
     filtered_df = df
 elif sector and not cliente:
-    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE Time >= "20:00:00" AND FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM V_ClientesF WHERE FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
     params = [s, e] 
     #df = pd.read_sql_query (query, con, params=params)
     #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
@@ -92,7 +92,7 @@ elif sector and not cliente:
     filtered_df = df
     #filtered_df = df[df["SectorD"].isin(sector)]
 elif not sector and cliente:
-    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE Time >= "20:00:00" AND FechaC >= ? AND FechaC <= ? AND ClientesD IN ({});'.format(', '.join(["'{}'".format(v) for v in cliente]))      
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM V_ClientesF WHERE FechaC >= ? AND FechaC <= ? AND ClientesD IN ({});'.format(', '.join(["'{}'".format(v) for v in cliente]))      
     params = [s, e] 
     df = pd.read_sql_query (query, con, params=params)
     #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
@@ -100,7 +100,7 @@ elif not sector and cliente:
     filtered_df = df
     #filtered_df = df[df["ClientesD"].isin(cliente)]
 else:
-    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE Time >= "20:00:00" AND FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM V_ClientesF WHERE FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
     params = [s, e] 
     df = pd.read_sql_query (query, con, params=params)
     filtered_df = df
