@@ -118,7 +118,7 @@ cluster_df = filtered_df.groupby(by = ["Cluster"], as_index = False)["Active_ene
 # ClusterHistogram - SectorDonut -- Graphics
 with col1:
     col1.metric(label="Total clientes", value=filtered_df["ClientesD"].nunique())
-    col1.metric(label="Vr máximo consumo por cliente", value=filtered_df["Active_energy"].max())
+    col1.metric(label="Vr máximo consumo por cliente - kwh", value=round(filtered_df["Active_energy"].max(),2))
     
     st.subheader("Clusters o grupos de clientes")
     st.caption("Información de consumo de energia por cluster o grupos de clientes")
@@ -128,7 +128,7 @@ with col1:
 
 with col2:
     col2.metric(label="Total registros de consumos", value=len(filtered_df))
-    col2.metric(label="Vr promedio de consumo por cliente", value=filtered_df["Active_energy"].mean())
+    col2.metric(label="Vr promedio de consumo por cliente - kwh", value=round(filtered_df["Active_energy"].mean(),2))
 
     st.subheader("Información de Sectores")
     st.caption("Porcentaje de consumo de energia por sector")
@@ -227,6 +227,19 @@ fig5 = px.bar(filtered_df, x = "Active_energy", y = "SectorD", orientation='h' )
 st.plotly_chart(fig5, use_container_width=True)
 
 st.subheader("Detalles de Clientes")
-st.caption("Información de consumo de energía por clientes")
-fig6 = px.bar(filtered_df, x = "Active_energy", y = "ClientesD", orientation='h' )
-st.plotly_chart(fig6, use_container_width=True)
+#st.caption("Información de consumo de energía por clientes")
+#fig6 = px.bar(filtered_df, x = "Active_energy", y = "ClientesD", orientation='h' )
+#st.plotly_chart(fig6, use_container_width=True)
+with st.expander("Detalles de Clientes"):
+    st.write(filtered_df)
+    csv = filtered_df.to_csv(index = False).encode('utf-8')
+    st.download_button("Descargar Datos", data = csv, file_name = "Clientes.csv", mime = "text/csv",
+                        help = 'Click para descargar datos en formato CSV')
+
+st.subheader("Última actualización 2024-05-26")
+# scatter plot with Active_energy and Reactive_energy
+#data_ar = px.scatter(filtered_df, x = "ClientesD", y = "Active_energy", size = "Reactive_energy")
+#data_ar['layout'].update(title="Relación entre Energía Activa y Energía Reactiva",
+#                       titlefont = dict(size=20),xaxis = dict(title="ClientesD",titlefont=dict(size=15)),
+#                       yaxis = dict(title = "Active_energy", titlefont = dict(size=15)))
+#st.plotly_chart(data_ar,use_container_width=True)
