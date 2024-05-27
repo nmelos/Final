@@ -11,7 +11,7 @@ import platform
 import sqlite3
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
-from streamlit_extras.metric_cards import style_metric_cards
+#from streamlit_extras.metric_cards import style_metric_cards
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wide")
