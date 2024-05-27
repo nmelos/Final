@@ -9,9 +9,6 @@ import warnings
 import sys
 import platform
 import sqlite3
-import matplotlib.pyplot as plt
-import plotly.figure_factory as ff
-#from streamlit_extras.metric_cards import style_metric_cards
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wide")
@@ -19,8 +16,10 @@ st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wi
 #st.title(" :bar_chart: ElectroDunas")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
 
+os.chdir('C:/Nelson/ANDES/Bimestre 8/Proyecto aplicado en analítica de datos/Semana 8/Prueba/CargaTG')
 con = sqlite3.connect('Clientes.db')
-df = pd.read_sql_query ("SELECT * FROM ClientesF", con)
+
+#print(df)
 
 ## Logo Tittle
 image = Image.open('ElectroDunasLogo.jpg')
@@ -30,52 +29,91 @@ with col1:
 with col2:
     st.title("")
 
-st.subheader("Fechas de consulta")
 ## create new column fecha_ymd
-df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+#df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+#SELECT DATE(MAX(Fecha), '-5 month') AS FI, DATE(MAX(Fecha)) AS FM FROM ClientesF;
+Fechas = pd.read_sql_query ('SELECT * FROM V_Fechas;', con)
+
+#print(Fechas)
 
 col1, col2 = st.columns((2))
-df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"])
+#df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"])
 
 # Getting the min and max fecha_ymd 
-startDate = pd.to_datetime(df["fecha_ymd"]).min()
-endDate = pd.to_datetime(df["fecha_ymd"]).max()
+#startDate = pd.to_datetime(df["fecha_ymd"]).min()
+#endDate = pd.to_datetime(df["fecha_ymd"]).max()
+startDate = pd.to_datetime(Fechas["FI"]).min()
+endDate = pd.to_datetime(Fechas["FM"]).max()
 
 with col1:
-    date1 = pd.to_datetime(st.date_input("Fecha inicio de consulta", startDate))
+    date1 = pd.to_datetime(st.date_input("Fecha Inicio", startDate))
+    s=date1.strftime("%Y-%m-%d")
 with col2:
-    date2 = pd.to_datetime(st.date_input("Fecha fin de consulta", endDate))
+    date2 = pd.to_datetime(st.date_input("Fecha Fin", endDate))
+    e=date2.strftime("%Y-%m-%d")
 
-df = df[(df["fecha_ymd"] >= date1) & (df["fecha_ymd"] <= date2)].copy()
 
-# SideBar Filters
+# Filters
 st.sidebar.header("Escoge tu filtro: ")
-# Choose Sector
-sector = st.sidebar.multiselect("Escoge el Sector", df["SectorD"].unique())
-if not sector:
-    df2 = df.copy()
-else:
-    df2 = df[df["SectorD"].isin(sector)]
 
-# Choose Cliente
-cliente = st.sidebar.multiselect("Escoge el Cliente", df2["ClientesD"].unique())
-if not cliente:
-    df3 = df2.copy()
+# Choose for Sector
+query = 'SELECT DISTINCT SectorD, ClientesD FROM Clientes WHERE FechaC >= ? AND FechaC <= ? ORDER BY ClientesD, SectorD;'
+params = [s, e]
+SectorCliente = pd.read_sql_query (query, con, params=params)
+#sector = st.sidebar.multiselect("Escoge el Sector", sector)
+sector = st.sidebar.multiselect("Escoge el Sector", SectorCliente["SectorD"].unique())
+if not sector:
+    SectorCliente2 = SectorCliente.copy()
 else:
-    df3 = df2[df2["ClientesD"].isin(cliente)]
+    SectorCliente2 = SectorCliente[SectorCliente["SectorD"].isin(sector)]
+
+# Choose for Cliente
+cliente = st.sidebar.multiselect("Escoge el Cliente", SectorCliente2["ClientesD"].unique())
+if not cliente:
+    SectorCliente3 = SectorCliente2.copy()
+else:
+    SectorCliente3 = SectorCliente2[SectorCliente2["ClientesD"].isin(cliente)]
+
 
 # Filter the data based on sector and cliente
 if not sector and not cliente:
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE FechaC >= ? AND FechaC <= ?;'
+    params = [s, e]
+    df = pd.read_sql_query (query, con, params=params)
+    #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+    #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
     filtered_df = df
 elif sector and not cliente:
-    filtered_df = df[df["SectorD"].isin(sector)]
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
+    params = [s, e] 
+    df = pd.read_sql_query (query, con, params=params)
+    #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+    #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
+    filtered_df = df
+    #filtered_df = df[df["SectorD"].isin(sector)]
 elif not sector and cliente:
-    filtered_df = df[df["ClientesD"].isin(cliente)]
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE FechaC >= ? AND FechaC <= ? AND ClientesD IN ({});'.format(', '.join(["'{}'".format(v) for v in cliente]))      
+    params = [s, e] 
+    df = pd.read_sql_query (query, con, params=params)
+    #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+    #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
+    filtered_df = df
+    #filtered_df = df[df["ClientesD"].isin(cliente)]
 else:
-    filtered_df = df3[df["SectorD"].isin(sector) & df3["ClientesD"].isin(cliente)]
-
+    query = 'SELECT "index", Fecha, SectorD, ClientesD, Cluster, Active_energy, FechaC, Anomalo FROM Clientes WHERE FechaC >= ? AND FechaC <= ? AND SectorD IN ({});'.format(', '.join(["'{}'".format(v) for v in sector]))      
+    params = [s, e] 
+    df = pd.read_sql_query (query, con, params=params)
+    filtered_df = df
+    #df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+    #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
+    #filtered_df = df[df["SectorD"].isin(sector)]
+    filtered_df = filtered_df[filtered_df["ClientesD"].isin(cliente)]
+    
+    
+df['fecha_ymd'] = df.iloc[:, 1].str[:10]
+df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"])
+    
 cluster_df = filtered_df.groupby(by = ["Cluster"], as_index = False)["Active_energy"].sum()
-
 
 # ClusterHistogram - SectorDonut -- Graphics
 with col1:
@@ -144,11 +182,11 @@ st.plotly_chart(fig3, use_container_width=True)
 st.subheader('Análisis de Anomalías')
 st.caption("Información de registro de consumos de energía con y sin anomalías, generado con modelo de aprendizaje no supervisado")
 
-df_tmp = filtered_df[filtered_df.iloc[:, 14] == 1].copy()
+df_tmp = filtered_df[filtered_df.iloc[:, 7] == 1].copy()
 df_anom = df_tmp.copy()
 df_agg_anom = df_anom.groupby('fecha_ymd')['Active_energy'].sum().reset_index()
 
-df_tmp = filtered_df[filtered_df.iloc[:, 14] == 0].copy()
+df_tmp = filtered_df[filtered_df.iloc[:, 7] == 0].copy()
 df_no_anom = df_tmp.copy()
 df_agg_no_anom = df_no_anom.groupby('fecha_ymd')['Active_energy'].sum().reset_index()
 
