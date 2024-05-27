@@ -19,7 +19,7 @@ st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wi
 #st.title(" :bar_chart: ElectroDunas")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
 
-con = sqlite3.connect('./Clientes.db')
+con = sqlite3.connect('Clientes.db')
 df = pd.read_sql_query ("SELECT * FROM ClientesF", con)
 
 ## Logo Tittle
