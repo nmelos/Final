@@ -16,7 +16,7 @@ st.set_page_config(page_title="ElectroDunas", page_icon=":bar_chart:",layout="wi
 #st.title(" :bar_chart: ElectroDunas")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
 
-#os.chdir('C:/Nelson/ANDES/Bimestre 8/Proyecto aplicado en analítica de datos/Semana 8/Prueba/CargaTG')
+os.chdir('C:/Nelson/ANDES/Bimestre 8/Proyecto aplicado en analítica de datos/Semana 8/Prueba/CargaTG')
 con = sqlite3.connect('Clientes.db')
 
 #print(df)
@@ -108,10 +108,12 @@ else:
     #df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"]) 
     #filtered_df = df[df["SectorD"].isin(sector)]
     filtered_df = filtered_df[filtered_df["ClientesD"].isin(cliente)]
+    #filtered_df = df
     
     
-df['fecha_ymd'] = df.iloc[:, 1].str[:10]
-df["fecha_ymd"] = pd.to_datetime(df["fecha_ymd"])
+filtered_df['fecha_ymd'] = filtered_df.iloc[:, 1].str[:10]
+filtered_df["fecha_ymd"] = pd.to_datetime(filtered_df["fecha_ymd"])
+#filtered_df["year_month"] = filtered_df["fecha_ymd"].dt.to_period("M")
     
 cluster_df = filtered_df.groupby(by = ["Cluster"], as_index = False)["Active_energy"].sum()
 
